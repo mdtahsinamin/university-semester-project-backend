@@ -1,15 +1,22 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const bcrypt = require('bcrypt');
+const { v4: uuidv4 } = require('uuid');
+const jwt = require('jsonwebtoken');
+
 const userSchema = new Schema({
      name : {
-        type : String,
-         require : [true,  'Please enter your name'],
+         type : String,
+         required : [true,  'Please enter your name'],
          minlength: [3, 'Must be at least 3']
+     },
+     username : {
+       type : String,
+       default: uuidv4()
      },
      email: {
          type : String,
-         require : [true, 'Please enter your email'],
+         required : [true, 'Please enter your email'],
          unique : [true, 'User already exists'],
          lowercase : true,
          validate:{
@@ -20,39 +27,81 @@ const userSchema = new Schema({
          }
      },
      picture:{
-        type : String,
-        default:"picture not uploaded"
+          public_id :{
+            type: String,
+            required: true
+          },
+          url:{
+            type: String,
+            required: true
+          }
      },
      password: {
         type : String,
-        require : [true, 'Please enter your password'],
+        required : [true, 'Please enter your password'],
         minLength: [8, 'Must be at least 8'],
         select: false
      },
+     role:{
+      type: String,
+      default: "user"
+     },
+     address: {
+       type: String,
+       default: "Dhaka"
+     },
+     isEmailVerify:{
+        type: Boolean,
+        default: false
+     },
+     resetPasswordToken : String,
+     resetPasswordExpires : Date,
      
 },{versionKey : false});
 
+// *  password hash
 userSchema.pre('save', async function (next){
-       try {
-          if(this.isNew){
-            const salt = await bcrypt.genSalt(10);
-            const hashPassword = await bcrypt.hash(this.password, salt);
-            this.password = hashPassword;
-          }
-       } catch (error) {
-        
-       }
-})
-/*
-userSchema.methods.isValidPassword = async function (candidatePassword, userPassword) {
-   try {
-      return await bcrypt.compare(candidatePassword, userPassword)
-   } catch (error) {
-      console.log(error);
+   if(!this.isModified()){
+      next();
    }
+   const salt = await bcrypt.genSalt(10);
+   const hashPassword = await bcrypt.hash(this.password, salt);
+   this.password = hashPassword;
+})
+
+// * jwt token
+
+userSchema.methods.getJWTToken = function(){
+
+   return jwt.sign({ 
+      id: this._id, 
+      name : this.name,
+      email: this.email, 
+      username: this.username, 
+      picture: this.picture.url,
+      isEmailVerify: this.isEmailVerify
+    }, process.env.JWT_TOKEN_SECRET, 
+    {
+      expiresIn: process.env.JWT_EXPIRE,
+    });
 }
-*/
+
+// compare password
+userSchema.methods.comparePassword = async function (candidatePassword) {
+      return await bcrypt.compare(candidatePassword, this.password)
+}
+
 
 const userModel = mongoose.model('User', userSchema);
 
 module.exports = userModel;
+
+
+/*
+if(this.isNew){
+            const salt = await bcrypt.genSalt(10);
+            const hashPassword = await bcrypt.hash(this.password, salt);
+            this.password = hashPassword;
+          }
+
+*/

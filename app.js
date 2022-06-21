@@ -5,8 +5,13 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const mongoose = require('mongoose');
 const morgan = require('morgan')
-const router = require("./src/routes/userRoute");
-
+const router = require("./src/routes/index");
+const rateLimit =require('express-rate-limit');
+const helmet =require('helmet');
+const mongoSanitize =require('express-mongo-sanitize');
+const xss =require('xss-clean');
+const hpp =require('hpp')
+const ErrorMiddleware = require('./src/middleware/error')
 // initialize
 const app = express();
 
@@ -15,22 +20,22 @@ app.use(cors());
 app.use(morgan('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use(helmet())
+app.use(mongoSanitize())
+app.use(xss())
+app.use(hpp())
 
-// mongo 
+// Request Rate Limit
+const limiter= rateLimit({windowMs:15*60*1000,max:3000})
+app.use(limiter)
 
-let URL =  "mongodb://127.0.0.1:27017/customer"
-let options = {user:"",pass:''}
-mongoose.connect(URL, options,(err)=>{
-    try {
-        console.log("Mongoose connection Establish success")
-    }catch(e) {
-        console.log(err)
-    }
-})
 
 
 app.use('/api/v1',router);
 
+
+// error handler route 
+app.use(ErrorMiddleware);
 
 // Undefined Route
 
