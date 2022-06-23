@@ -45,6 +45,11 @@ const ProductSchema = new Schema({
     },
     reviews: [
         {
+          user:{
+              type: mongoose.Schema.ObjectId,
+              ref:"User",
+              required: true,
+          },
           name: {
             type: String,
             required: true,
@@ -59,6 +64,11 @@ const ProductSchema = new Schema({
           },
         },
     ],
+    user: {
+        type: mongoose.Schema.ObjectId,
+        ref:"User",
+        required: true,
+    },
     dateCreated: { 
         type: Date, 
         default: Date.now

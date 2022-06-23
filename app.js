@@ -12,6 +12,7 @@ const mongoSanitize =require('express-mongo-sanitize');
 const xss =require('xss-clean');
 const hpp =require('hpp')
 const ErrorMiddleware = require('./src/middleware/error')
+const cookieParser = require('cookie-parser');
 // initialize
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(cors());
 app.use(morgan('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use(cookieParser())
 app.use(helmet())
 app.use(mongoSanitize())
 app.use(xss())

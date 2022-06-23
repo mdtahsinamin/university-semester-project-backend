@@ -11,7 +11,26 @@ module.exports = (err, req, res , next) => {
 
        err = new ErrorHandler(message, 400);
    }
-   //console.log(err.name);
+
+   // duplicate mongodb id error
+
+    if(err.code === 11000){
+        message = `Duplicate ${Object.keys(err.keyValue)} Entered`;
+        err = new ErrorHandler(message, 400);
+    }
+
+    // Wrong JWT Token error
+
+    if (err.name === "JsonWebTokenError") {
+         message = `Json Web Token is invalid, Try again `;
+        err = new ErrorHandler(message, 400);
+    }
+
+     // JWT EXPIRE error
+    if (err.name === "TokenExpiredError") {
+        message = `Json Web Token is Expired, Try again `;
+        err = new ErrorHandler(message, 400);
+    }
 
     res.status(statusCode).json({
         success: false,
