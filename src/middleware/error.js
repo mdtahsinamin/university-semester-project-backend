@@ -1,4 +1,4 @@
-const ErrorHandler = require("../utils/errorHandler");
+const ErrorHandler = require("../utils/ErrorHandler");
 
 module.exports = (err, req, res , next) => {
     let {message ='Internal Server Error', statusCode = 500} = err;

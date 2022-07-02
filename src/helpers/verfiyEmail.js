@@ -1,5 +1,5 @@
 const sendMail = require("./sendMail");
-const ErrorHandler = require("../utils/errorHandler");
+const ErrorHandler = require("../utils/ErrorHandler");
 const verifyEmail = async (user,req, res, next) =>{
     const verifyToken = user.getVerifyToken();
     await user.save();

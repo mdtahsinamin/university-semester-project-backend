@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/userModel');
-const ErrorHandler = require("../utils/errorHandler");
+const ErrorHandler = require("../utils/ErrorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const bcrypt = require('bcrypt');
 const sentToken = require('../helpers/jwt_token');
