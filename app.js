@@ -19,11 +19,6 @@ const pdfTemplate = require('./src/document/index');
 // initialize
 const app = express();
 
-const corsOptions ={
-    origin:'http://localhost:3000', 
-    credentials:true,            //access-control-allow-credentials:true
-}
-
 // use 
 app.use(cors());
 app.use(morgan('dev'))
