@@ -18,10 +18,10 @@ const sendMail = async(options) =>{
       
       client.messages.create(DOMAIN, messageData)
        .then((res) => {
-         console.log(res);
+        
        })
        .catch((err) => {
-         console.error(err);
+       
        });
 }
 

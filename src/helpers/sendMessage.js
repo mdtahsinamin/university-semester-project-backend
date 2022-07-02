@@ -8,9 +8,13 @@ const sendMessage = async (phoneNumber) => {
          body: 'Your Order is delivered',
          from: "+18703002745",
          messagingServiceSid: 'MGe585152384e3dbe0019f780b5717ed03',
-         to: `+${phoneNumber}`
+         to: `+880${phoneNumber}`
        })
-      .then(message => console.log(message));
+      .then(message => {
+         res.status(200).json({
+             success: true,
+         })
+      });
 }
 
 module.exports = sendMessage

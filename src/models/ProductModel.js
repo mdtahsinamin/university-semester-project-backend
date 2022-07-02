@@ -10,16 +10,19 @@ const ProductSchema = new Schema({
         type : String,
         required : [true, 'Please enter description']
     },
-    img:{
-          type : String,
-          default: "images not found"
-    },
+    images:[{
+        public_id:{
+            type: String,
+            required:true,
+        },
+        url:{
+            type: String,
+            required:true,
+        },
+     },],
     category:{
         type: String,
         required: [true, "Please Enter Product Category"],
-    },
-    size: { 
-        type: Array
     },
     color: { 
         type: Array

@@ -3,8 +3,7 @@ const authController = require("../controllers/authController");
 const { isAuthenticatedUser,verifyAdmin } = require('../middleware/verifyAuth');
 const router = express.Router();
 
-
-router.post('/user-register', authController.userRegistration );
+router.post('/user-register',authController.userRegistration );
 router.post('/user-login', authController.login);
 
 router.post('/password/forgot', authController.forgotPassword);
@@ -24,7 +23,9 @@ router.put('/admin/role/:id', isAuthenticatedUser, verifyAdmin("admin"),authCont
 
 router.delete('/admin/user/:id', isAuthenticatedUser, verifyAdmin("admin"),authController.deleteUser)
 
+router.put('/email/verify/:token', authController.emailVerify);
 
+router.get('/stats',isAuthenticatedUser,verifyAdmin("admin"),authController.Stats);
 
 router.get('/user-logout',authController.logout);
 

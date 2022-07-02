@@ -44,6 +44,18 @@ class ApiFeatures{
 
         return this;
     }
+    sort(){
+        const queryCopy = {...this.queryStr};
+       // remove some field for categories
+        const removeFields = ["keyword", "page", "limit","price","rating"];
+
+        removeFields.forEach(key =>{
+            delete queryCopy[key];
+        })
+
+        this.query = this.query.find().sort({price:Number(queryCopy.sort)});
+        return this;
+    }
     
 }
 

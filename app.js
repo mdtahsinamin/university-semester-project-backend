@@ -13,8 +13,16 @@ const xss =require('xss-clean');
 const hpp =require('hpp')
 const ErrorMiddleware = require('./src/middleware/error')
 const cookieParser = require('cookie-parser');
+const fileUpload = require('express-fileupload');
+const pdf = require('html-pdf');
+const pdfTemplate = require('./src/document/index');
 // initialize
 const app = express();
+
+const corsOptions ={
+    origin:'http://localhost:3000', 
+    credentials:true,            //access-control-allow-credentials:true
+}
 
 // use 
 app.use(cors());
@@ -22,6 +30,7 @@ app.use(morgan('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
+app.use(fileUpload({useTempFiles : true}));
 app.use(helmet())
 app.use(mongoSanitize())
 app.use(xss())
@@ -39,11 +48,25 @@ app.use('/api/v1',router);
 // error handler route 
 app.use(ErrorMiddleware);
 
+app.post('/create-pdf', (req, res) => {
+    pdf.create(pdfTemplate(req.body), {}).toFile('result.pdf', (err) => {
+        if(err) {
+            res.send(Promise.reject());
+        }
+        res.send(Promise.resolve());
+    })
+})
+
+app.get('/fetch-pdf', (req, res) => {
+    res.sendFile(`${__dirname}/result.pdf`)
+})
+
 // Undefined Route
 
 app.use('*', (req,res)=>{
     res.status(404).json({status:"Failure" , data:"Not Found"});
 })
+
 
 
 module.exports = app;

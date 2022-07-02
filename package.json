@@ -6,21 +6,27 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start-server": "nodemon index.js --ignore '../e-shop/'",
+    "start-client": "npm start --prefix e-shop",
+    "dev": "concurrently \"npm run start-server\" \"npm run start-client\""
   },
   "author": "Muhammad Tahsin Amin",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.0",
+    "cloudinary": "^1.30.0",
+    "concurrently": "^7.2.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "express-fileupload": "^1.4.0",
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^6.4.0",
     "helmet": "^5.1.0",
     "hpp": "^0.2.3",
+    "html-pdf": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
     "mailgun-js": "^0.22.0",
     "mailgun.js": "^7.0.2",
@@ -32,6 +38,7 @@
     "nodemailer": "^6.7.5",
     "nodemailer-mailgun-transport": "^2.1.4",
     "nodemon": "^2.0.16",
+    "stripe": "^9.11.0",
     "twilio": "^3.77.3",
     "uuid": "^8.3.2",
     "xss-clean": "^0.1.1"

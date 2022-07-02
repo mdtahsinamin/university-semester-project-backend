@@ -39,7 +39,7 @@ exports.createNewOrder = catchAsyncErrors(async (req , res, next)=>{
 // * get Single Order
 exports.getSingleOrder = catchAsyncErrors(async (req , res, next)=>{
 
-    const order = await OrderModel.findById(req.params.id).populate("user", "name, email");
+    const order = await OrderModel.findById(req.params.id).populate("user", "name",);
 
     if(!order) {
         return next(new ErrorHandler('Order not found', 404))
@@ -94,19 +94,21 @@ exports.updateOrderStatus = catchAsyncErrors(async (req , res, next)=>{
     
     // product and quantity update
     // order.product it is a id
+    if (req.body.status === "Shipped") {
     order.orderItems.forEach( async (o)=>{
         await updateStock(o.product, o.quantity);
     })
+   }
 
     order.orderStatus = req.body.status;
 
-    if (req.body.status === "Delivered") {
+     if (req.body.status === "Delivered") {
         order.deliveredAt = Date.now();
      }
      
-        const {phoneNumber} = order.shippingInfo;
-        await sendMessage(phoneNumber);
-     await order.save({ validateBeforeSave: false })
+      const {phoneNumber} = order.shippingInfo;
+      await sendMessage(phoneNumber);
+      await order.save({ validateBeforeSave: false })
 
      res.status(200).json({
         success: true,
@@ -117,6 +119,7 @@ exports.updateOrderStatus = catchAsyncErrors(async (req , res, next)=>{
 async function updateStock(id, quantity){
      const product = await ProductModel.findById(id);
      product.stock -= quantity;
+     if(product.stock < 0) product.stock = 0;
     await product.save({ validateBeforeSave: false });
 }
 

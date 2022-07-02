@@ -12,12 +12,14 @@ const {isAuthenticatedUser, verifyAdmin} = require('../middleware/verifyAuth');
 router.post('/admin/new-product',isAuthenticatedUser, verifyAdmin("admin"),productController.createProduct);  // image upload
 
 router.get('/get-product',productController.getAllProduct);
+router.get('/admin/get-products',isAuthenticatedUser, verifyAdmin("admin"),
+productController.getAllProducts);
 
 router.put('/admin/:id',isAuthenticatedUser, verifyAdmin("admin"),productController.updateProduct);
 
 router.delete('/admin/:id',isAuthenticatedUser, verifyAdmin("admin"),productController.deleteProduct);
 
-router.post('/review',isAuthenticatedUser, productController.productReviews);
+router.put('/review',isAuthenticatedUser, productController.productReviews);
 
 router.get('/reviews',productController.getProductReviews)
 router.delete('/reviews',isAuthenticatedUser, productController.deleteProductReview);

@@ -6,11 +6,21 @@ const bcrypt = require('bcrypt');
 const sentToken = require('../helpers/jwt_token');
 const ObjectId = require('mongodb').ObjectId;
 const sendMail = require('../helpers/sendMail');
+const cloudinary = require('cloudinary').v2
 const crypto = require('crypto');
+const verifyEmail = require('../helpers/verfiyEmail');
 
 
-exports.userRegistration = catchAsyncErrors(async (req , res) =>{
- 
+exports.userRegistration = catchAsyncErrors(async (req , res, next) =>{
+  
+   const file = req.files.picture;
+  
+   const myCloud = await cloudinary.uploader.upload(file.tempFilePath,{
+         folder: 'User-Profile',
+         width: 150,
+         crop: "scale",
+       }
+   )
     const {name, email, password} = req.body;
 
     const user = await userModel.create({
@@ -18,17 +28,16 @@ exports.userRegistration = catchAsyncErrors(async (req , res) =>{
        email,
        password,
        picture:{
-         public_id :'It is public_id',
-         url:'https://somting.com'
+         public_id: myCloud.public_id,
+         url:myCloud.secure_url
       },
     });
-
+    verifyEmail(user,req,res,next);
     sentToken(user,200,res);
 })
 
 exports.login = catchAsyncErrors(async (req , res,next) =>{
    const {email , password} = req.body;
-   console.log(email, password);
    // check email or password available or what
    if(!email || !password){
       return next(new ErrorHandler('Please enter email or password', 400));
@@ -85,7 +94,10 @@ exports.forgotPassword = catchAsyncErrors(async (req , res, next) =>{
    // save 
    await user.save();
 
-   const resetPasswordUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/password/reset/${resetToken}`;
+   const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
+
+   
+   // ${req.protocol}://${req.get('host')}
 
       const message = 
       `
@@ -96,7 +108,6 @@ exports.forgotPassword = catchAsyncErrors(async (req , res, next) =>{
          If you did not forget your password, please disregard this email.
          
       `
-
       try {
          await sendMail({
             email : user.email,
@@ -180,12 +191,27 @@ exports.updatePassword = catchAsyncErrors(async (req, res, next)=>{
 
 exports.userProfileUpdate = catchAsyncErrors(async (req , res, next)=>{
 
+   const file = req.files.picture;
+
    const updatedInfo ={
       name : req.body.name,
       email : req.body.email
    };
-  
-   // !image update 
+
+   if(req.files.picture !== ""){
+      const user = await userModel.findById(req.user.id);
+      const imagesId = user.picture.public_id;
+      await cloudinary.uploader.destroy(imagesId);
+
+      const myCloud = await cloudinary.uploader.upload(file.tempFilePath,{
+         folder: 'User-Profile',
+       }
+     )
+      updatedInfo.picture = {
+         public_id: myCloud.public_id,
+         url: myCloud.secure_url,
+      };
+   }
 
    const user = await userModel.findByIdAndUpdate(req.user.id, updatedInfo,{
       new: true,
@@ -256,6 +282,11 @@ exports.deleteUser = catchAsyncErrors(async (req , res, next) =>{
       return next(new ErrorHandler(`User doesn't exist with id ${req.params.id}`, 404));
     }
 
+
+    const imageId = user.picture.public_id;
+
+    await cloudinary.uploader.destroy(imageId);
+
     await user.remove();
 
     res.status(200).json({
@@ -263,3 +294,47 @@ exports.deleteUser = catchAsyncErrors(async (req , res, next) =>{
       message: 'User deleted successfully'
    })
 });
+
+exports.emailVerify = catchAsyncErrors(async (req , res, next)=>{
+   const verifyToken = crypto.createHash("sha256").update(req.params.token).digest('hex');
+
+   const user = await userModel.findOne({
+      verifyToken,
+      verifyTokenExpires : {$gt : Date.now()},
+   })
+
+   if(!user){
+      return next(new ErrorHandler("Token is invalid or has been expired",400))
+   }
+   
+   user.isEmailVerify = true;
+   user.verifyToken = undefined;
+   user.verifyTokenExpires = undefined;
+
+   await user.save();
+   sentToken(user,200,res);
+})
+
+exports.Stats = catchAsyncErrors(async (req , res, next)=>{
+   const date = new Date();
+   const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
+   try {
+      const data = await userModel.aggregate([
+        { $match: { createdAt: { $gte: lastYear } } },
+        {
+          $project: {
+            month: { $month: "$createdAt" },
+          },
+        },
+        {
+          $group: {
+            _id: "$month",
+            total: { $sum: 1 },
+          },
+        },
+      ]);
+      res.status(200).json(data)
+    } catch (err) {
+      res.status(500).json(err);
+    }
+})
