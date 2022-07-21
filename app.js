@@ -19,7 +19,12 @@ const pdfTemplate = require("./src/document/index");
 const app = express();
 
 // use
-app.use(cors());
+const corsConfig = {
+  origin: true,
+  credentials: true,
+};
+
+app.use(cors(corsConfig));
 app.use(morgan("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
