@@ -1,15 +1,15 @@
 module.exports = (order) => {
-
-
-const rows = order[0].orderItems?.map(item =>`
+  const rows = order[0].orderItems?.map(
+    (item) => `
    <tr>
      <td>${item.title}</td>
      <td>${item.price}</td>
      <td>${item.quantity}</td>
    </tr>
- `)
+ `
+  );
 
-   const createTable = (rows) => `
+  const createTable = (rows) => `
    <table>
      <tr>
         <th>Product Name</td>
@@ -19,10 +19,9 @@ const rows = order[0].orderItems?.map(item =>`
     ${rows}
   </table>
 `;
-const table = createTable(rows);
-   
+  const table = createTable(rows);
 
-return `
+  return `
     <!doctype html>
     <html>
        <head>
@@ -92,7 +91,6 @@ return `
                    </td>
                 </tr>
              </table>
-             ${table}
              <br />
              <h1 class="justify-center">Total price:${order[0].totalPrice}</h1>
              <h3 class="justify-center">Payment: ${order[0].paymentInfo?.status}</h3>

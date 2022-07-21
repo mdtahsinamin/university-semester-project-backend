@@ -1,32 +1,67 @@
-const express = require('express');
+const express = require("express");
 const authController = require("../controllers/authController");
-const { isAuthenticatedUser,verifyAdmin } = require('../middleware/verifyAuth');
+const {
+  isAuthenticatedUser,
+  verifyAdmin,
+} = require("../middleware/verifyAuth");
 const router = express.Router();
 
-router.post('/user-register',authController.userRegistration );
-router.post('/user-login', authController.login);
+router.post("/user-register", authController.userRegistration);
+router.post("/user-login", authController.login);
 
-router.post('/password/forgot', authController.forgotPassword);
-router.put('/password/reset/:token', authController.resetPassword);
+router.post("/password/forgot", authController.forgotPassword);
+router.put("/password/reset/:token", authController.resetPassword);
 
-router.get('/user-profile', isAuthenticatedUser,authController.getUserDetails);
-router.put('/update-password', isAuthenticatedUser,authController.updatePassword);
+router.get("/user-profile", isAuthenticatedUser, authController.getUserDetails);
+router.put(
+  "/update-password",
+  isAuthenticatedUser,
+  authController.updatePassword
+);
 
-router.put('/update-profile', isAuthenticatedUser, authController.userProfileUpdate);
+router.put(
+  "/update-profile",
+  isAuthenticatedUser,
+  authController.userProfileUpdate
+);
 
+router.get(
+  "/admin/get-users",
+  isAuthenticatedUser,
+  verifyAdmin("admin"),
+  authController.getAllUser
+);
 
-router.get('/admin/get-users', isAuthenticatedUser, verifyAdmin("admin"),authController.getAllUser)
+router.get(
+  "/admin/user/:id",
+  isAuthenticatedUser,
+  verifyAdmin("admin"),
+  authController.singleUser
+);
 
-router.get('/admin/user/:id', isAuthenticatedUser, verifyAdmin("admin"),authController.singleUser)
+router.put(
+  "/admin/role/:id",
+  isAuthenticatedUser,
+  verifyAdmin("admin"),
+  authController.updateRoles
+);
 
-router.put('/admin/role/:id', isAuthenticatedUser, verifyAdmin("admin"),authController.updateRoles);
+router.delete(
+  "/admin/user/:id",
+  isAuthenticatedUser,
+  verifyAdmin("admin"),
+  authController.deleteUser
+);
 
-router.delete('/admin/user/:id', isAuthenticatedUser, verifyAdmin("admin"),authController.deleteUser)
+router.put("/email/verify/:token", authController.emailVerify);
 
-router.put('/email/verify/:token', authController.emailVerify);
+router.get(
+  "/stats",
+  isAuthenticatedUser,
+  verifyAdmin("admin"),
+  authController.Stats
+);
 
-router.get('/stats',isAuthenticatedUser,verifyAdmin("admin"),authController.Stats);
-
-router.get('/user-logout',authController.logout);
+router.get("/user-logout", authController.logout);
 
 module.exports = router;
