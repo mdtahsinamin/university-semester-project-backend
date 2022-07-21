@@ -91,6 +91,7 @@ module.exports = (order) => {
                    </td>
                 </tr>
              </table>
+             ${table}
              <br />
              <h1 class="justify-center">Total price:${order[0].totalPrice}</h1>
              <h3 class="justify-center">Payment: ${order[0].paymentInfo?.status}</h3>
